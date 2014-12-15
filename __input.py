@@ -17,7 +17,7 @@
 
 from bs4 import BeautifulSoup
 import mechanize, bencode
-import time, os, hashlib, ConfigParser, ast, md5, socket
+import time, os, hashlib, ConfigParser, ast, md5
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
