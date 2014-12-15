@@ -377,7 +377,7 @@ def processing(br) :
 
 	for url in action_url:
 		try:
-			response = br.open(url, timeout=float(1))
+			response = br.open(url)
 			soup = BeautifulSoup(response.read())
 		except Exception, e:
 			print "%s\\n응답이 없습니다." %(url)
