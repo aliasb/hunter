@@ -6,7 +6,7 @@
 
 # hunter(find seed)
 # for synology
-# version 141215
+# version 141216
 # Completed DSM : 4.3-3810, 5.0-4418(beta), 5.0-4493(update7), 5.0-4528(update2)
 # python 2.7.8
 
@@ -302,6 +302,38 @@ def torrentbest_level_1(soup, title, action_url, parser_cache) :
 
 	return [action_url, parser_cache]
 
+def torrent82_level_1(soup, title, action_url, parser_cache) :
+	
+	links = soup.find_all("nobr")
+	deep_search = conf.getboolean("option", "deep_search")
+
+	for link in links:
+		alink = link.find("a")
+		tmp = alink["title"]
+		
+		if deep_search == False :
+			try:
+				if get_md5_to_log.index(calc_md5(tmp)) >= 0 : 
+					continue
+			except Exception, e:
+				pass
+
+		tmp = tmp.replace(" ", "")
+		get_title = tmp.lower()
+
+		get_act_link = "http://www.torrent82.com"+alink["href"]
+
+		if conf.getboolean("option", "enable_cache") :
+			tmp_list = [get_title, get_act_link]
+			print "%s, %s" %(get_title, get_act_link)
+			parser_cache.append(tmp_list)
+			
+		if compare_title(get_title, title, 0) :
+				action_url.append(get_act_link)
+	sys.exit()
+	return [action_url, parser_cache]
+
+
 #===============================================
 #===============================================
 
@@ -320,7 +352,7 @@ def make_url_from_genre(genre) :
 def make_url(list_url, genre) :
 	conf_page = conf.getint("option", "search_page")
 	if conf_page < 1 or conf_page > 20 : conf_page = 1
-	
+
 	for key,path in conf.items(genre):
 			for line in path.split("\\n") :
 				for i in range(1, conf_page+1) :
@@ -362,7 +394,11 @@ def find_active_url(br) :
 				print "%s\\n응답이 없습니다." %(url)
 				continue
 
-			ret_list = torrentbest_level_1(soup, title, action_url, parser_cache)
+			if url.find("torrentbest") >= 0 :
+				ret_list = torrentbest_level_1(soup, title, action_url, parser_cache)
+			elif url.find("torrent82") >= 0 :
+				ret_list = torrent82_level_1(soup, title, action_url, parser_cache)
+
 			action_url = ret_list[0]
 			parser_cache = ret_list[1]
 
@@ -404,7 +440,6 @@ if __name__ == "__main__":
 	now = time.localtime()
 
 	print "==========START [%04d%02d%02d %02d:%02d:%02d]" %(now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-
 	main()
 
 	print "===============END (processing time : %.02fs) # code by alias_b" % (time.time()-start_time)
